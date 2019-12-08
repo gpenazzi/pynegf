@@ -16,8 +16,9 @@ class PyNegf:
     """
     class LNParams(Structure):
         """
-        This is the wrapper around the main libnegf input data structure and must be kept
-        up-to-date with the corresponding C data structure in lnParams.h
+        This is the wrapper around the main libnegf input data structure and
+        must be kept up-to-date with the corresponding C data structure in
+        lnParams.h
         """
         _fields_ = [
             ("verbose", c_int),
@@ -76,7 +77,7 @@ class PyNegf:
         self._lib.negf_init.argtypes = [self._href_type]
         self._lib.negf_init(self._href)
 
-        #Init parameters to default
+        # Init parameters to default
         self.params = PyNegf.LNParams()
         self.get_params()
 
@@ -142,8 +143,11 @@ class PyNegf:
         re_f = c_char_p(re_fname)
         im_f = c_char_p(im_fname)
         tt = c_int(target)
-        self._lib.negf_read_hs.argtypes = [self._href_type,
-            c_char_p, c_char_p, c_int]
+        self._lib.negf_read_hs.argtypes = [
+            self._href_type,
+            c_char_p,
+            c_char_p,
+            c_int]
         self._lib.negf_read_hs(self._href, re_f, im_f, tt)
 
     def set_identity_overlap(self, nrow):
@@ -170,30 +174,31 @@ class PyNegf:
         """
         # Always call init_contacts here. We anyway have the information.
         self._lib.negf_init_structure.argtypes = [
-                self._href_type,
-                c_int]
+            self._href_type,
+            c_int]
         self._lib.negf_init_contacts(
-                self._href,
-                c_int(ncont))
+            self._href,
+            c_int(ncont))
 
         npl = plend.size
 
         self._lib.negf_init_structure.argtypes = [
-                self._href_type,
-                c_int,
-                ndpointer(c_int),
-                ndpointer(c_int),
-                c_int,
-                ndpointer(c_int),
-                ndpointer(c_int)
-                ]
-        self._lib.negf_init_structure(self._href,
-                c_int(ncont),
-                contend.astype(dtype=INTTYPE, copy=False),
-                surfend.astype(dtype=INTTYPE, copy=False),
-                c_int(npl),
-                plend.astype(dtype=INTTYPE, copy=False),
-                cblk.astype(dtype=INTTYPE, copy=False))
+            self._href_type,
+            c_int,
+            ndpointer(c_int),
+            ndpointer(c_int),
+            c_int,
+            ndpointer(c_int),
+            ndpointer(c_int)
+            ]
+        self._lib.negf_init_structure(
+            self._href,
+            c_int(ncont),
+            contend.astype(dtype=INTTYPE, copy=False),
+            surfend.astype(dtype=INTTYPE, copy=False),
+            c_int(npl),
+            plend.astype(dtype=INTTYPE, copy=False),
+            cblk.astype(dtype=INTTYPE, copy=False))
 
     def set_hamiltonian(self, mat):
         """
@@ -261,23 +266,24 @@ class PyNegf:
             im_en (array): imaginary part (same as above)
         """
         self._lib.negf_get_energies.argtypes = [
-                self._href_type,
-                POINTER(c_int),
-                ndpointer(c_double),
-                ndpointer(c_double),
-                c_int
-                ]
+            self._href_type,
+            POINTER(c_int),
+            ndpointer(c_double),
+            ndpointer(c_double),
+            c_int
+            ]
         npoints = c_int()
-        self._lib.negf_get_energies(self._href,
-                byref(npoints),
-                np.zeros(1,dtype=REALTYPE),
-                np.zeros(1,dtype=REALTYPE), 0)
+        self._lib.negf_get_energies(
+            self._href,
+            byref(npoints),
+            np.zeros(1, dtype=REALTYPE),
+            np.zeros(1, dtype=REALTYPE), 0)
         re_en = np.zeros(npoints.value, dtype=REALTYPE)
         im_en = np.zeros(npoints.value, dtype=REALTYPE)
-        self._lib.negf_get_energies(self._href,
-                byref(npoints), re_en, im_en, 1)
-        return re_en, im_en
-
+        self._lib.negf_get_energies(
+            self._href,
+            byref(npoints), re_en, im_en, 1)
+        return re_en + 1.j*im_en
 
     def currents(self):
         """
@@ -288,20 +294,21 @@ class PyNegf:
             each possible lead pair defined in input
         """
         self._lib.negf_get_currents.argtypes = [
-                self._href_type,
-                POINTER(c_int),
-                ndpointer(c_double),
-                c_int
-                ]
+            self._href_type,
+            POINTER(c_int),
+            ndpointer(c_double),
+            c_int
+            ]
         npoints = c_int()
-        self._lib.negf_get_currents(self._href,
-                byref(npoints),
-                np.zeros(1,dtype=REALTYPE), 0)
+        self._lib.negf_get_currents(
+            self._href,
+            byref(npoints),
+            np.zeros(1,dtype=REALTYPE), 0)
         currents = np.zeros(npoints.value, dtype=REALTYPE)
-        self._lib.negf_get_currents(self._href,
-                byref(npoints), currents, 1)
+        self._lib.negf_get_currents(
+            self._href,
+            byref(npoints), currents, 1)
         return currents
-
 
     def densitymatrix(self):
         """
@@ -311,41 +318,41 @@ class PyNegf:
             dm (scipy sparse): density matrix
         """
         self._lib.negf_get_dm.argtypes = [
-                self._href_type,
-                POINTER(c_int),
-                POINTER(c_int),
-                ndpointer(c_int),
-                ndpointer(c_int),
-                ndpointer(c_double),
-                ndpointer(c_double),
-                c_int
-                ]
+            self._href_type,
+            POINTER(c_int),
+            POINTER(c_int),
+            ndpointer(c_int),
+            ndpointer(c_int),
+            ndpointer(c_double),
+            ndpointer(c_double),
+            c_int
+            ]
         nnz = c_int()
         nrow = c_int()
-        self._lib.negf_get_dm(self._href,
-                byref(nnz),
-                byref(nrow),
-                np.zeros(1,dtype=INTTYPE),
-                np.zeros(1,dtype=INTTYPE),
-                np.zeros(1,dtype=REALTYPE),
-                np.zeros(1,dtype=REALTYPE), 0)
+        self._lib.negf_get_dm(
+            self._href,
+            byref(nnz),
+            byref(nrow),
+            np.zeros(1,dtype=INTTYPE),
+            np.zeros(1,dtype=INTTYPE),
+            np.zeros(1,dtype=REALTYPE),
+            np.zeros(1,dtype=REALTYPE), 0)
         rowpnt =np.zeros(nrow.value + 1, dtype=INTTYPE)
         colind =np.zeros(nnz.value, dtype=INTTYPE)
         re_dm = np.zeros(nnz.value, dtype=REALTYPE)
         im_dm = np.zeros(nnz.value, dtype=REALTYPE)
         self._lib.negf_get_dm(self._href,
-                byref(nnz),
-                byref(nrow),
-                rowpnt,
-                colind,
-                re_dm,
-                im_dm, 1)
+            byref(nnz),
+            byref(nrow),
+            rowpnt,
+            colind,
+            re_dm,
+            im_dm, 1)
         #Fix indexing
         rowpnt = rowpnt - 1
         colind = colind - 1
         dm = csr_matrix((re_dm + 1j*im_dm, colind, rowpnt), dtype='complex128')
         return dm
-
 
     def transmission(self):
         """
@@ -357,19 +364,19 @@ class PyNegf:
                 the result for a lead pair (npair, values).
         """
         self._lib.negf_associate_transmission.argtypes = [
-                self._href_type,
-                POINTER(c_int * 2),
-                POINTER(POINTER(c_double))
-                ]
+            self._href_type,
+            POINTER(c_int * 2),
+            POINTER(POINTER(c_double))
+            ]
         tr_pointer = POINTER(c_double)()
         tr_shape = (c_int * 2)()
-        self._lib.negf_associate_transmission(self._href,
-                pointer(tr_shape),
-                pointer(tr_pointer))
+        self._lib.negf_associate_transmission(
+            self._href,
+            pointer(tr_shape),
+            pointer(tr_pointer))
         tr_shape = (tr_shape[1] , tr_shape[0])
         trans = (np.ctypeslib.as_array(tr_pointer, shape=tr_shape)).copy()
         return trans
-
 
     def ldos(self):
         """
@@ -381,19 +388,19 @@ class PyNegf:
                 an interval (ninterval, values)
         """
         self._lib.negf_associate_ldos.argtypes = [
-                self._href_type,
-                POINTER(c_int * 2),
-                POINTER(POINTER(c_double))
-                ]
+            self._href_type,
+            POINTER(c_int * 2),
+            POINTER(POINTER(c_double))
+            ]
         ldos_pointer = POINTER(c_double)()
         ldos_shape = (c_int * 2)()
-        self._lib.negf_associate_ldos(self._href,
-                pointer(ldos_shape),
-                pointer(ldos_pointer))
+        self._lib.negf_associate_ldos(
+            self._href,
+            pointer(ldos_shape),
+            pointer(ldos_pointer))
         ldos_shape = (ldos_shape[1] , ldos_shape[0])
         ldos = (np.ctypeslib.as_array(ldos_pointer, shape=ldos_shape)).copy()
         return ldos
-
 
     def set_ldos_intervals(self, istart, iend):
         """
