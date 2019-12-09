@@ -10,7 +10,8 @@ Pynegf is a Python wrapper around `libnegf <https://github.com/libnegf/libnegf>`
 a Fortran library for the simulation of nanoelectronic devices based on the
 Non Equilibrium Green's Function (NEGF) method.
 
-`libnegf <https://github.com/libnegf/libnegf>`_ is used in `DFTB+ <https://dftbplus-develguide.readthedocs.io/en/latest/>`,
+`libnegf <https://github.com/libnegf/libnegf>`_ is used in
+`DFTB+ <https://dftbplus-develguide.readthedocs.io/en/latest/>`_,
 the purpose of this wrapper is to allow using the NEGF algorithm with custom
 Hamiltonian or with external electronic structure codes.
 
