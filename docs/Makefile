@@ -21,4 +21,4 @@ help:
 
 github-pages:
 	@make html
-	@cp -a _build/html/. ../docs
+	@cp -a _build/html/. ../ghpages/
