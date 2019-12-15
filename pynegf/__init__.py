@@ -77,3 +77,7 @@ def cdll_libnegf() ->  ctypes.CDLL:
         The loaded CDLL object
     """
     return dependencies['negf']
+
+
+# Package imports.
+from .pynegf import PyNegf

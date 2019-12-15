@@ -374,7 +374,7 @@ class PyNegf:
             self._href,
             pointer(tr_shape),
             pointer(tr_pointer))
-        tr_shape = (tr_shape[1] , tr_shape[0])
+        tr_shape = (tr_shape[0] , tr_shape[1])
         trans = (np.ctypeslib.as_array(tr_pointer, shape=tr_shape)).copy()
         return trans
 
