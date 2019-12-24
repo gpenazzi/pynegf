@@ -39,10 +39,10 @@ def test_transmission_linear_chain():
     # Initialize the system structure.
     negf.init_structure(
         2,
-        numpy.array([80, 100]),
-        numpy.array([60, 80]),
-        numpy.array([15, 30, 45, 60]),
-        numpy.array([4, 1]))
+        numpy.array([79, 99]),
+        numpy.array([59, 79]),
+        numpy.array([14, 29, 44, 59]),
+        numpy.array([3, 0]))
 
     # Initialize parameters relevant for the transmission.
     negf.params.emin = -3.0
@@ -53,7 +53,7 @@ def test_transmission_linear_chain():
     negf.print_tnegf()
 
     # Set also some local DOS intervals.
-    negf.set_ldos_intervals(numpy.array([1, 31, 1]), numpy.array([60, 60, 30]))
+    negf.set_ldos_intervals(numpy.array([0, 30, 0]), numpy.array([59, 59, 29]))
     negf.solve_landauer()
 
     #Get transmission, dos and energies as numpy object

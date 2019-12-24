@@ -166,11 +166,10 @@ class PyNegf:
 
         Args:
             ncont (int): number of contacts
-            contend (numpy.ndarray): end of contact indexes (fortran indexing)
-            surfend (numpy.ndarray): end of surface indexes (fortran indexing)
-            plend (numpy.ndarray): end of PL indexes (fortran indexing)
+            contend (numpy.ndarray): end of contact indexes
+            surfend (numpy.ndarray): end of surface indexes
+            plend (numpy.ndarray): end of PL indexes
             cblk (numpy.ndarray): indexes of blocks interacting with contacts
-                (fortran indexing)
         """
         # Always call init_contacts here. We anyway have the information.
         self._lib.negf_init_structure.argtypes = [
@@ -191,14 +190,21 @@ class PyNegf:
             ndpointer(c_int),
             ndpointer(c_int)
             ]
+
+        # Convert to fortran indexing.
+        contend_f = contend + 1
+        surfend_f = surfend + 1
+        plend_f = plend + 1
+        cblk_f = cblk + 1
+
         self._lib.negf_init_structure(
             self._href,
             c_int(ncont),
-            contend.astype(dtype=INTTYPE, copy=False),
-            surfend.astype(dtype=INTTYPE, copy=False),
+            contend_f.astype(dtype=INTTYPE, copy=False),
+            surfend_f.astype(dtype=INTTYPE, copy=False),
             c_int(npl),
-            plend.astype(dtype=INTTYPE, copy=False),
-            cblk.astype(dtype=INTTYPE, copy=False))
+            plend_f.astype(dtype=INTTYPE, copy=False),
+            cblk_f.astype(dtype=INTTYPE, copy=False))
 
     def set_hamiltonian(self, mat):
         """
@@ -407,10 +413,13 @@ class PyNegf:
         Define intervals for LDOS calculations
 
         Args:
-            istart (int array): starting orbitals (fortran indexing)
-            iend (int array): ending orbitals (fortran indexing)
+            istart (int array): starting orbitals
+            iend (int array): ending orbitals
         """
         nldos = istart.size
+        # Convert to fortran indexing.
+        istart_f = istart + 1
+        iend_f = iend + 1
         self._lib.negf_init_ldos(self._href, c_int(nldos))
         self._lib.negf_set_ldos_intervals.argtypes = [
                 self._href_type,
@@ -419,8 +428,8 @@ class PyNegf:
                 ndpointer(c_int)]
         self._lib.negf_set_ldos_intervals(self._href,
                 nldos,
-                istart.astype(dtype=INTTYPE, copy=False),
-                iend.astype(dtype=INTTYPE, copy=False))
+                istart_f.astype(dtype=INTTYPE, copy=False),
+                iend_f.astype(dtype=INTTYPE, copy=False))
 
 
     def write_tun_and_dos(self):
