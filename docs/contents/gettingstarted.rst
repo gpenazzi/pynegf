@@ -1,18 +1,30 @@
 Getting started
 ==================
 
-To get started you must have installed libnegf on your system. This dependency
-is not provided by the package yet. In order to be imported, libnegf
-has to be compiled as dynamic library. This is as simple as doing:
+To get started you must have installed `libnegf <https://github.com/libnegf/libnegf>`_
+on your system. libnegf is also shipped as submodule of pynegf.
+It is suggested to build from the submodule to ensure consistency between the
+wrapper and the library.
+
+To clone the submodule run in the pynegf root directory:
+
+::
+    $ git submodule init
+    $ git submodule clone
+
+
+To compile libnegf refer to the library documentation. The simplest way is
+to use cmake:
 
 ::
 
-    $ git clone https://github.com/libnegf/libnegf.git
     $ cd libnegf && mkdir _build && cd _build
     $ cmake -DBUILD_SHARED_LIBS ..
     $ make
     $ make install
 
+If you install in a directory with root privileges, you will need to run
+`make install` as admin or with sudo.
 Pynegf will then try to determine libnegf location automatically.
 
 The python wrapper works similarly to the Fortran library: the Hamiltonian and
