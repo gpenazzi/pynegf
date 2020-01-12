@@ -36,6 +36,8 @@ Pynegf allows to use most of libnegf features. Currently this include:
 
    modules.rst
 
+   notebooks/linearchain.ipynb
+
 
 Indices and tables
 ==================
