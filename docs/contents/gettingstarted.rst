@@ -1,10 +1,10 @@
 Getting started
 ==================
 
-To get started you must have installed `libnegf <https://github.com/libnegf/libnegf>`_
-on your system. libnegf is also shipped as submodule of pynegf.
-It is suggested to build from the submodule to ensure consistency between the
-wrapper and the library.
+Pynegf requires a working installation of
+`libnegf <https://github.com/libnegf/libnegf>`_. Pynegf ships
+his own version of libnegf as submodule, as it might occasionally
+point at experimental forks ahead of the official release.
 
 To clone the submodule run in the pynegf root directory:
 
@@ -13,19 +13,30 @@ To clone the submodule run in the pynegf root directory:
     $ git submodule clone
 
 
-To compile libnegf refer to the library documentation. The simplest way is
-to use cmake:
+The compilation of the distributed submodule is driven by
+`scikit-build <https://github.com/scikit-build/scikit-build>`_.
+Installing pynegf should be as simple as running
 
 ::
 
-    $ cd libnegf && mkdir _build && cd _build
-    $ cmake -DBUILD_SHARED_LIBS ..
-    $ make
-    $ make install
+    $ pip install .
 
-If you install in a directory with root privileges, you will need to run
-`make install` as admin or with sudo.
-Pynegf will then try to determine libnegf location automatically.
+the package can also be installed with `pip install -e` (editable mode)
+for development purpose. In this case, make sure to add the location
+of the generated `libnegf.so` to `LD_LIBRARY_PATH`.
+Pynegf requires also an installed version of blas and lapack, which are
+loaded at runtime.
+
+It is also possible to install libnegf in the system, and pynegf will
+try to locate it automatically.
+You can force a given libnegf path doing the following:
+
+::
+
+    $ import pynegf
+    $ pynegf.settings['negf']=r'/home/user/whateverpath/libnegf.so'
+    $ pynegf.dependencies = load_dependencies()
+
 
 The python wrapper works similarly to the Fortran library: the Hamiltonian and
 Overlap are passed as input parameters using setters.

@@ -10,6 +10,9 @@ __pycache__/
 .Python
 build/
 _build/
+_skbuild/
+pynegf.egg-info/
+pip-wheel-metadata/
 
 # Develop
 .vscode

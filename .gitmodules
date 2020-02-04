@@ -3,4 +3,4 @@
 	url = https://github.com/gpenazzi/pynegf-docs.git
 [submodule "libnegf"]
 	path = libnegf
-	url = https://github.com/libnegf/libnegf.git
+	url = https://github.com/gpenazzi/libnegf.git
