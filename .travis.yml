@@ -23,5 +23,6 @@ install:
 - pip3 install pytest
 
 script:
-- pip install .
+- pip3 install .
+- export LD_LIBRARY_PATH=/home/travis/virtualenv/python3.7.5/lib/
 - python3 -m pytest -s pynegf_test
