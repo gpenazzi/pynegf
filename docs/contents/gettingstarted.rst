@@ -22,13 +22,23 @@ Installing pynegf should be as simple as running
     $ pip install .
 
 the package can also be installed with `pip install -e` (editable mode)
-for development purpose. In this case, make sure to add the location
-of the generated `libnegf.so` to `LD_LIBRARY_PATH`.
+for development purpose. Depending on your system settings, you might need
+to add the generated `libnegf.so` to `LD_LIBRARY_PATH`.
+The package can also be installed using `setup.py`, which might grant
+more flexibility in passing flags to cmake. For example, to
+compile libnegf with MPI support you can use:
+::
+
+    $ python setup.py develop -- -DWITH_MPI=ON
+
+For more information on how to pass additional arguments refer to the
+`scikit-build <https://github.com/scikit-build/scikit-build>`_ documentation.
+
 Pynegf requires also an installed version of blas and lapack, which are
 loaded at runtime.
 
-It is also possible to install libnegf in the system, and pynegf will
-try to locate it automatically.
+It is also possible to install libnegf and skip the libnegf build step
+in installation.
 You can force a given libnegf path doing the following:
 
 ::
