@@ -20,7 +20,8 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=['numpy', 'scipy'],
-    tests_requires=['pytest'],
-    cmake_args=['-DBUILD_SHARED_LIBS=ON'],
+    tests_require=['pytest'],
+    cmake_args=[
+        '-DBUILD_SHARED_LIBS=ON'],
     cmake_source_dir='libnegf'
 )
