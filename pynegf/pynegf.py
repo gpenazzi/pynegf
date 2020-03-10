@@ -1,9 +1,12 @@
 import numpy as np
-from ctypes import *
+import logging
 
-from numpy.ctypeslib import ndpointer
+from ctypes import *
 from numpy import dtype
+from numpy.ctypeslib import ndpointer
 from scipy.sparse import csr_matrix
+from pynegf import mpi
+
 
 MAXCONT = 10
 INTTYPE = 'int32'
@@ -54,9 +57,12 @@ class PyNegf:
             ("min_or_max", c_int),
             ("isSid", c_bool)]
 
-    def __init__(self):
+    def __init__(self, mpicomm=None):
         """
         Initialize an handler to the libnegf library.
+
+        Args:
+            mpicomm (mpi4py.MPI.Intracomm): the MPI communicator
         """
         # Check if the library is loaded.
         from pynegf import cdll_libnegf
@@ -66,16 +72,30 @@ class PyNegf:
         else:
             self._lib = cdll_libnegf()
 
+        # Check if we have MPI. By default if MPI is available and no communicator
+        # is given, then use WORLD.
+        if mpicomm is not None and not mpi.has_mpi:
+            logging.error(
+                'An mpi communicator has been given, but mpi is not supported. Running serially.')
+        elif mpicomm is None and mpi.has_mpi():
+            mpicomm = mpi.get_world_comm()
+            logging.info('Running libnegf on {} processes'.format(mpicomm.Get_size()))
+
         #Initialize and store handler reference in self._href
         self._handler_size = c_int()
         self._lib.negf_gethandlersize(byref(self._handler_size))
         self._handler = (c_int * self._handler_size.value)()
         self._href = pointer(self._handler)
         self._href_type = POINTER(c_int * self._handler_size.value)
+        self._lib.negf_set_mpi_fcomm.argtypes = [self._href_type, c_int]
         self._lib.negf_init_session.argtypes = [self._href_type]
         self._lib.negf_init_session(self._href)
         self._lib.negf_init.argtypes = [self._href_type]
         self._lib.negf_init(self._href)
+
+        # Set MPI communicator.
+        if mpicomm is not None:
+            self._lib.negf_set_mpi_fcomm(self._href, mpicomm.py2f())
 
         # Init parameters to default
         self.params = PyNegf.LNParams()
