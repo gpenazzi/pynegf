@@ -15,22 +15,32 @@ class Settings(dict):
         # Populate first with all defaults.
         self.update(self.defaults())
 
-
     @staticmethod
-    def defaults():
+    def defaults() -> typing.Dict[str, typing.Any]:
         """
-        Returns a dictionary of default settings.
+        Returns a dictionary of default settings. The available settings are:
+
+        `negf_path`: path of libnegf
+        `blas_path`: path of libblas
+        `lapack_path`: path of liblapack
+        `mpi_support`: whether the library should run with MPI support.
         """
         defaults = {}
         # Populate the default paths.
         for lib in ('negf', 'blas', 'lapack'):
             defaults[lib + '_path'] = ctypes.util.find_library(lib)
 
+        # Whether we run in parallel.
+        defaults['mpi_support'] = True
+
         return defaults
 
 
 # Initialize global settings.
 settings = Settings()
+
+# Set log level temporarily hardcoded.
+logging.getLogger().setLevel(logging.INFO)
 
 
 def load_dependencies() -> typing.Dict[str, ctypes.CDLL]:
@@ -71,7 +81,7 @@ def load_dependencies() -> typing.Dict[str, ctypes.CDLL]:
 dependencies = load_dependencies()
 
 
-def cdll_libnegf() ->  ctypes.CDLL:
+def cdll_libnegf() -> ctypes.CDLL:
     """
     Return:
         The loaded CDLL object
