@@ -23,6 +23,8 @@ install:
 - pip3 install pytest
 
 script:
-- pip3 install .
-- export LD_LIBRARY_PATH=/home/travis/virtualenv/python3.7.5/lib/
+- python ./setup.py install --force
+- export PYTHON_VERSION=$(python -V 2>&1 | grep -Po '(?<=Python )(.+)')
+- echo ${PYTHON_VERSION}
+- export LD_LIBRARY_PATH=/home/travis/virtualenv/python${PYTHON_VERSION}/lib/python3.7/site-packages/pynegf-0.0.1-py3.7-linux-x86_64.egg/lib/
 - python3 -m pytest -s pynegf_test
