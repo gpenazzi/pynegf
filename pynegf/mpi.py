@@ -29,5 +29,5 @@ def get_world_comm():
     if _HAS_MPI:
         from mpi4py import MPI
         return MPI.COMM_WORLD
-    else:
-        return None
+
+    return None

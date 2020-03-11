@@ -3,6 +3,9 @@ import ctypes.util
 import logging
 import typing
 
+# Package imports.
+from .pynegf import PyNegf
+
 
 class Settings(dict):
     """
@@ -52,17 +55,22 @@ def load_dependencies() -> typing.Dict[str, ctypes.CDLL]:
     """
 
     # Load libraries
-    error_message = ("lib{0} was not found. Provide a path in pynegf.settings['{0}_path'] "
-                     " and run >>>pynegf.dependencies = pynegf.load_dependencies()")
+    error_message = (
+        "lib{0} was not found. Provide a path in pynegf.settings['{0}_path'] "
+        " and run >>>pynegf.dependencies = pynegf.load_dependencies()")
 
     try:
-        blas_cdll = ctypes.CDLL(settings['blas_path'], mode=ctypes.RTLD_GLOBAL)
+        blas_cdll = ctypes.CDLL(
+            settings['blas_path'],
+            mode=ctypes.RTLD_GLOBAL)
     except OSError:
         blas_cdll = None
         logging.warning(error_message.format('blas'))
 
     try:
-        lapack_cdll = ctypes.CDLL(settings['lapack_path'], mode=ctypes.RTLD_GLOBAL)
+        lapack_cdll = ctypes.CDLL(
+            settings['lapack_path'],
+            mode=ctypes.RTLD_GLOBAL)
     except OSError:
         lapack_cdll = None
         logging.warning(error_message.format('lapack'))
@@ -73,7 +81,10 @@ def load_dependencies() -> typing.Dict[str, ctypes.CDLL]:
         negf_cdll = None
         logging.warning(error_message.format('negf'))
 
-    dependencies = {'negf': negf_cdll, 'blas': blas_cdll, 'lapack': lapack_cdll}
+    dependencies = {
+        'negf': negf_cdll,
+        'blas': blas_cdll,
+        'lapack': lapack_cdll}
 
     return dependencies
 
@@ -87,7 +98,3 @@ def cdll_libnegf() -> ctypes.CDLL:
         The loaded CDLL object
     """
     return dependencies['negf']
-
-
-# Package imports.
-from .pynegf import PyNegf
