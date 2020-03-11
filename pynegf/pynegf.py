@@ -1,10 +1,19 @@
-import numpy as np
 import logging
+from ctypes import POINTER
+from ctypes import Structure
+from ctypes import byref
+from ctypes import c_bool
+from ctypes import c_char
+from ctypes import c_char_p
+from ctypes import c_double
+from ctypes import c_int
+from ctypes import pointer
 
-from ctypes import *
-from numpy import dtype
+import numpy as np
 from numpy.ctypeslib import ndpointer
 from scipy.sparse import csr_matrix
+
+from pynegf import cdll_libnegf
 from pynegf import mpi
 
 
@@ -65,23 +74,23 @@ class PyNegf:
             mpicomm (mpi4py.MPI.Intracomm): the MPI communicator
         """
         # Check if the library is loaded.
-        from pynegf import cdll_libnegf
         self._lib = None
         if cdll_libnegf() is None:
             raise RuntimeError("libnegf.so has not been loaded. Call pynegf.load_library() first.")
-        else:
-            self._lib = cdll_libnegf()
+        self._lib = cdll_libnegf()
 
-        # Check if we have MPI. By default if MPI is available and no communicator
-        # is given, then use WORLD.
+        # Check if we have MPI. By default if MPI is available and no
+        # communicator is given, then use WORLD.
         if mpicomm is not None and not mpi.has_mpi:
             logging.error(
-                'An mpi communicator has been given, but mpi is not supported. Running serially.')
+                'An mpi communicator has been given, but mpi is not supported. '
+                'Running serially.')
         elif mpicomm is None and mpi.has_mpi():
             mpicomm = mpi.get_world_comm()
-            logging.info('Running libnegf on {} processes'.format(mpicomm.Get_size()))
+            logging.info('Running libnegf on {} processes'.format(
+                mpicomm.Get_size()))
 
-        #Initialize and store handler reference in self._href
+        # Initialize and store handler reference in self._href
         self._handler_size = c_int()
         self._lib.negf_gethandlersize(byref(self._handler_size))
         self._handler = (c_int * self._handler_size.value)()
@@ -114,9 +123,8 @@ class PyNegf:
         or to get default values.
         """
         self._lib.negf_get_params.argtypes = [
-                self._href_type,
-                POINTER(PyNegf.LNParams)
-                ]
+            self._href_type,
+            POINTER(PyNegf.LNParams)]
         self._lib.negf_get_params(self._href, pointer(self.params))
 
     def set_params(self):
@@ -125,9 +133,8 @@ class PyNegf:
         This is always called before a "solve" function
         """
         self._lib.negf_set_params.argtypes = [
-                self._href_type,
-                POINTER(PyNegf.LNParams)
-                ]
+            self._href_type,
+            POINTER(PyNegf.LNParams)]
         self._lib.negf_set_params(self._href, byref(self.params))
 
     def read_negf_in(self):
@@ -245,7 +252,8 @@ class PyNegf:
             ndpointer(c_int)]
         mat_re = np.array(np.real(mat.data))
         mat_im = np.array(np.imag(mat.data))
-        self._lib.negf_set_h_cp(self._href,
+        self._lib.negf_set_h_cp(
+            self._href,
             c_int(mat.shape[0]),
             mat_re,
             mat_im,
@@ -272,7 +280,8 @@ class PyNegf:
             ndpointer(c_int)]
         mat_re = np.array(np.real(mat.data))
         mat_im = np.array(np.imag(mat.data))
-        self._lib.negf_set_s_cp(self._href,
+        self._lib.negf_set_s_cp(
+            self._href,
             c_int(mat.shape[0]),
             mat_re,
             mat_im,
@@ -329,7 +338,7 @@ class PyNegf:
         self._lib.negf_get_currents(
             self._href,
             byref(npoints),
-            np.zeros(1,dtype=REALTYPE), 0)
+            np.zeros(1, dtype=REALTYPE), 0)
         currents = np.zeros(npoints.value, dtype=REALTYPE)
         self._lib.negf_get_currents(
             self._href,
@@ -359,22 +368,23 @@ class PyNegf:
             self._href,
             byref(nnz),
             byref(nrow),
-            np.zeros(1,dtype=INTTYPE),
-            np.zeros(1,dtype=INTTYPE),
-            np.zeros(1,dtype=REALTYPE),
-            np.zeros(1,dtype=REALTYPE), 0)
-        rowpnt =np.zeros(nrow.value + 1, dtype=INTTYPE)
-        colind =np.zeros(nnz.value, dtype=INTTYPE)
+            np.zeros(1, dtype=INTTYPE),
+            np.zeros(1, dtype=INTTYPE),
+            np.zeros(1, dtype=REALTYPE),
+            np.zeros(1, dtype=REALTYPE), 0)
+        rowpnt = np.zeros(nrow.value + 1, dtype=INTTYPE)
+        colind = np.zeros(nnz.value, dtype=INTTYPE)
         re_dm = np.zeros(nnz.value, dtype=REALTYPE)
         im_dm = np.zeros(nnz.value, dtype=REALTYPE)
-        self._lib.negf_get_dm(self._href,
+        self._lib.negf_get_dm(
+            self._href,
             byref(nnz),
             byref(nrow),
             rowpnt,
             colind,
             re_dm,
             im_dm, 1)
-        #Fix indexing
+        # Fix indexing
         rowpnt = rowpnt - 1
         colind = colind - 1
         dm = csr_matrix((re_dm + 1j*im_dm, colind, rowpnt), dtype='complex128')
@@ -400,7 +410,7 @@ class PyNegf:
             self._href,
             pointer(tr_shape),
             pointer(tr_pointer))
-        tr_shape = (tr_shape[0] , tr_shape[1])
+        tr_shape = (tr_shape[0], tr_shape[1])
         trans = (np.ctypeslib.as_array(tr_pointer, shape=tr_shape)).copy()
         return trans
 
@@ -424,7 +434,7 @@ class PyNegf:
             self._href,
             pointer(ldos_shape),
             pointer(ldos_pointer))
-        ldos_shape = (ldos_shape[1] , ldos_shape[0])
+        ldos_shape = (ldos_shape[1], ldos_shape[0])
         ldos = (np.ctypeslib.as_array(ldos_pointer, shape=ldos_shape)).copy()
         return ldos
 
@@ -442,15 +452,15 @@ class PyNegf:
         iend_f = iend + 1
         self._lib.negf_init_ldos(self._href, c_int(nldos))
         self._lib.negf_set_ldos_intervals.argtypes = [
-                self._href_type,
-                c_int,
-                ndpointer(c_int),
-                ndpointer(c_int)]
-        self._lib.negf_set_ldos_intervals(self._href,
-                nldos,
-                istart_f.astype(dtype=INTTYPE, copy=False),
-                iend_f.astype(dtype=INTTYPE, copy=False))
-
+            self._href_type,
+            c_int,
+            ndpointer(c_int),
+            ndpointer(c_int)]
+        self._lib.negf_set_ldos_intervals(
+            self._href,
+            nldos,
+            istart_f.astype(dtype=INTTYPE, copy=False),
+            iend_f.astype(dtype=INTTYPE, copy=False))
 
     def write_tun_and_dos(self):
         """
