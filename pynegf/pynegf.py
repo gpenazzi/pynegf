@@ -387,8 +387,9 @@ class PyNegf:
         # Fix indexing
         rowpnt = rowpnt - 1
         colind = colind - 1
-        dm = csr_matrix((re_dm + 1j*im_dm, colind, rowpnt), dtype='complex128')
-        return dm
+        density_matrix = csr_matrix(
+            (re_dm + 1j*im_dm, colind, rowpnt), dtype='complex128')
+        return density_matrix
 
     def transmission(self):
         """
