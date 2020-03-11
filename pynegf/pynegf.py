@@ -13,7 +13,6 @@ import numpy as np
 from numpy.ctypeslib import ndpointer
 from scipy.sparse import csr_matrix
 
-from pynegf import cdll_libnegf
 from pynegf import mpi
 
 
@@ -73,6 +72,7 @@ class PyNegf:
         Args:
             mpicomm (mpi4py.MPI.Intracomm): the MPI communicator
         """
+        from pynegf import cdll_libnegf
         # Check if the library is loaded.
         self._lib = None
         if cdll_libnegf() is None:
