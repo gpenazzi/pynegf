@@ -26,15 +26,11 @@ class Settings(dict):
         `negf_path`: path of libnegf
         `blas_path`: path of libblas
         `lapack_path`: path of liblapack
-        `mpi_support`: whether the library should run with MPI support.
         """
         defaults = {}
         # Populate the default paths.
         for lib in ('negf', 'blas', 'lapack'):
             defaults[lib + '_path'] = ctypes.util.find_library(lib)
-
-        # Whether we run in parallel.
-        defaults['mpi_support'] = True
 
         return defaults
 

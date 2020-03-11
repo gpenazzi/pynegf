@@ -1,16 +1,13 @@
-from pynegf import settings
 import logging
 
 _HAS_MPI = False
 
-if settings['mpi_support']:
-    try:
-        import mpi4py
-        _HAS_MPI = True
-    except ModuleNotFoundError:
-        logging.info('Module mpi4py not found. MPI support has been disabled.')
-        settings['mpi_support'] = False
-        _HAS_MPI = False
+try:
+    import mpi4py
+    _HAS_MPI = True
+except ModuleNotFoundError:
+    logging.info('Module mpi4py not found. MPI support has been disabled.')
+    _HAS_MPI = False
 
 
 def has_mpi():
