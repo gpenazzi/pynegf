@@ -187,7 +187,7 @@ class PyNegf:
         self._lib.negf_set_s_id.argtypes = [self._href_type, c_int]
         self._lib.negf_set_s_id(self._href, c_int(nrow))
 
-    def init_structure(self, ncont, contend, surfend, plend, cblk):
+    def init_structure(self, ncont, contend, surfend, plend=None, cblk=None):
         """
         Initialize the geometrical structure.
 
@@ -195,8 +195,10 @@ class PyNegf:
             ncont (int): number of contacts
             contend (numpy.ndarray): end of contact indexes
             surfend (numpy.ndarray): end of surface indexes
-            plend (numpy.ndarray): end of PL indexes
-            cblk (numpy.ndarray): indexes of blocks interacting with contacts
+            plend (numpy.ndarray): end of PL indexes. If None to trigger
+                an automatic partitioning.
+            cblk (numpy.ndarray): indexes of blocks interacting with contacts.
+                Ignored if plend is None.
         """
         # Always call init_contacts here. We anyway have the information.
         self._lib.negf_init_structure.argtypes = [
@@ -205,6 +207,13 @@ class PyNegf:
         self._lib.negf_init_contacts(
             self._href,
             c_int(ncont))
+
+        if cblk is None and plend is not None:
+            raise ValueError("cblk must be specified if plend is specified.")
+        if plend is None:
+            plend = numpy.array([])
+        if cblk is None:
+            cblk = numpy.array([])
 
         npl = plend.size
 
