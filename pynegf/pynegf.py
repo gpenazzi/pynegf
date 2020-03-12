@@ -29,7 +29,7 @@ class PyNegf:
         """
         This is the wrapper around the main libnegf input data structure and
         must be kept up-to-date with the corresponding C data structure in
-        lnParams.h
+        lnParams.h.
         """
         _fields_ = [
             ("verbose", c_int),
@@ -354,7 +354,7 @@ class PyNegf:
             byref(npoints), currents, 1)
         return currents
 
-    def densitymatrix(self):
+    def density_matrix(self):
         """
         Get a local copy of CSR sparse density matrix
 
