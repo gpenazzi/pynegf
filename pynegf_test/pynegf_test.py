@@ -29,12 +29,12 @@ def _check_transmission_values(
     """
     Check that we have defined transmission within the given bandwidth.
     """
-    in_band_transmission = transmission[:, 0][
+    in_band_transmission = transmission[0, :][
         numpy.where(
             numpy.logical_and(
                 numpy.real(energies) > bandwidth[0],
                 numpy.real(energies) < bandwidth[1]))]
-    out_band_transmission = transmission[:, 0][
+    out_band_transmission = transmission[0, :][
         numpy.where(
             numpy.logical_or(
                 numpy.real(energies) < bandwidth[0],
@@ -64,22 +64,36 @@ def test_transmission_linear_chain():
         numpy.array([3, 0]))
 
     # Initialize parameters relevant for the transmission.
+    negf.params.g_spin = 1
     negf.params.emin = -3.0
     negf.params.emax = 3.0
     negf.params.estep = 0.01
-    negf.params.mu[0] = 0.01
+    negf.params.mu[0] = -0.5
+    negf.params.mu[1] = 0.5
     negf.set_params()
     # negf.print_tnegf()
 
     # Set also some local DOS intervals.
     negf.set_ldos_intervals(numpy.array([0, 30, 0]), numpy.array([59, 59, 29]))
+
     negf.solve_landauer()
 
     # Get transmission, dos and energies as numpy object
     energies = negf.energies()
     transmission = negf.transmission()
     ldos = negf.ldos()
+    # The system is homogeneous, therefore the first LDOS should be equal to
+    # the sum of the second and third.
+    assert ldos[0, :] == pytest.approx(ldos[1, :] + ldos[2, :])
+    # For sanity check also that the dos is positive and non all zero.
+    assert numpy.sum(ldos) > 1.0
+
+    # The current in ballistic current units should be equal the
+    # spin degeneracy we set, i.e. 1
     currents = negf.currents()
+    currents[0] == pytest.approx(1.0)
+
+    # Check that the transmission has the right integer values.
     _check_transmission_values(transmission, energies)
 
 
@@ -99,22 +113,37 @@ def test_transmission_automatic_partition():
     negf.init_structure(
         2,
         numpy.array([79, 99]),
-        numpy.array([59, 79]),
-        numpy.array([]),
-        numpy.array([3, 0]))
+        numpy.array([59, 79]))
 
     # Initialize parameters relevant for the transmission.
+    negf.params.g_spin = 1
     negf.params.emin = -3.0
     negf.params.emax = 3.0
     negf.params.estep = 0.01
-    negf.params.mu[0] = 0.01
+    negf.params.mu[0] = 0.1
     negf.set_params()
     # negf.print_tnegf()
 
     # Set also some local DOS intervals.
+    negf.set_ldos_intervals(numpy.array([0, 30, 0]), numpy.array([59, 59, 29]))
+
     negf.solve_landauer()
 
     # Get transmission, dos and energies as numpy object
     energies = negf.energies()
     transmission = negf.transmission()
+
+    ldos = negf.ldos()
+    # The system is homogeneous, therefore the first LDOS should be equal to
+    # the sum of the second and third.
+    assert ldos[0, :] == pytest.approx(ldos[1, :] + ldos[2, :])
+    # For sanity check also that the dos is positive and non all zero.
+    assert numpy.sum(ldos) > 1.0
+
+    # The current in ballistic current units should be equal the
+    # spin degeneracy we set, i.e. 1
+    currents = negf.currents()
+    currents[0] == pytest.approx(1.0)
+
+    # Check that the transmission has the right integer values.
     _check_transmission_values(transmission, energies)

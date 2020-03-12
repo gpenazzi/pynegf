@@ -406,8 +406,9 @@ class PyNegf:
 
         Returns:
             trans (ndarray): transmission for all possible
-                lead pairs (2D array). Each row contains
-                the result for a lead pair (npair, values).
+                lead pairs (2D array). Transmission for each lead pair
+                are ordered by row, i.e. trans[0, :] contains the
+                values for the first lead pair.
         """
         self._lib.negf_associate_transmission.argtypes = [
             self._href_type,
@@ -422,7 +423,7 @@ class PyNegf:
             pointer(tr_pointer))
         tr_shape = (tr_shape[0], tr_shape[1])
         trans = (np.ctypeslib.as_array(tr_pointer, shape=tr_shape)).copy()
-        return trans
+        return trans.T
 
     def ldos(self):
         """
