@@ -211,9 +211,9 @@ class PyNegf:
         if cblk is None and plend is not None:
             raise ValueError("cblk must be specified if plend is specified.")
         if plend is None:
-            plend = numpy.array([])
+            plend = np.array([])
         if cblk is None:
-            cblk = numpy.array([])
+            cblk = np.array([])
 
         npl = plend.size
 
