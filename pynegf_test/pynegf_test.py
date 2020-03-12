@@ -174,8 +174,8 @@ def test_density_linear_chain_eq():
     # We fully occupy all band and use mostly default values for
     # the integration contour.
     negf.params.ec = -2.5
-    negf.params.mu[0] = 3.0
-    negf.params.mu[1] = 3.0
+    negf.params.mu[0] = 0.0
+    negf.params.mu[1] = 0.0
     negf.params.kbt_dm = (.001, .001)
     negf.params.g_spin = 2.0
     # Not correctly initialized, setting explicitely.
@@ -187,9 +187,64 @@ def test_density_linear_chain_eq():
     # Calculate the density matrix.
     negf.solve_density()
     density_matrix = negf.density_matrix()
+    # We should have 1 particles (2 degeneracy, half band occupied) per site.
+    diagonal = density_matrix.diagonal()
+    assert diagonal[:60] == pytest.approx(1.0)
+
+    # The contact density matrix is ignored, therefore it should be zero.
+    assert diagonal[60:] == pytest.approx(0.0)
+
+
+def test_density_linear_chain_neq_bias():
+    """
+    Test the density matrix calculation at non-equilibrium for a linear
+    chain in full-band.
+    """
+    negf = pynegf.PyNegf()
+    # Build the sparse hamiltonian for the nearest-neighbor linear chain.
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=100, contact_size=20, coupling=1.0)
+
+    negf.set_hamiltonian(mat_csr)
+
+    # Set an identity overlap matrix.
+    negf.set_identity_overlap(100)
+
+    # Initialize the system structure.
+    negf.init_structure(
+        2,
+        numpy.array([79, 99]),
+        numpy.array([59, 79]))
+
+    # Set parameters relevant for the density matrix calculation.
+    # We fully occupy all band and use mostly default values for
+    # the integration contour.
+    negf.params.ec = -2.5
+    negf.params.mu[0] = 0.1
+    negf.params.mu[1] = -0.1
+    negf.params.kbt_dm = (.001, .001)
+    negf.params.g_spin = 2.0
+    # Not correctly initialized, setting explicitely.
+    negf.params.np_real = tuple([0] * 11)
+    negf.params.verbose = 0
+
+    negf.set_params()
+
+    # Calculate the density matrix.
+    negf.solve_density()
+    density_matrix = negf.density_matrix()
+    diagonal = density_matrix.diagonal()
+
+    # The system is ballistic, therefore we should have identical
+    # occupation all over the chain.
+    assert diagonal[:60] == pytest.approx(diagonal[0])
+
+    # The occupation should be slighlty above 1.0 (equilibrium case).
+    assert 0.01 < diagonal[0] - 1.0 < 0.05
+
     # We should have 2 particles (due to degeneracy) per site.
     diagonal = density_matrix.diagonal()
-    assert diagonal[:60] == pytest.approx(2.0)
+    print(diagonal)
 
     # The contact density matrix is ignored, therefore it should be zero.
     assert diagonal[60:] == pytest.approx(0.0)
