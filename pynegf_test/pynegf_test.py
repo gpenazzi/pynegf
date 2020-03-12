@@ -1,7 +1,8 @@
 import numpy
-import pynegf
 import pytest
-import scipy
+
+import pynegf
+from pynegf_test import utils
 
 # Skip if libnegf is not available.
 if pynegf.cdll_libnegf() is None:
@@ -11,26 +12,44 @@ if pynegf.cdll_libnegf() is None:
 
 
 def test_construction():
-    """ Test that we can construct a NEGF instance, without performing any operation. """
+    """
+    Test that we can construct a NEGF instance, without performing
+    any operation.
+    """
     foo = pynegf.PyNegf()
     assert(foo is not None)
+
+
+def _check_transmission_values(
+        transmission,
+        energies,
+        bandwidth=(-2.0, 2.0),
+        value=1.0,
+        energy_tolerance=0.01):
+    """
+    Check that we have defined transmission within the given bandwidth.
+    """
+    in_band_transmission = transmission[:, 0][
+        numpy.where(
+            numpy.logical_and(
+                numpy.real(energies) > bandwidth[0],
+                numpy.real(energies) < bandwidth[1]))]
+    out_band_transmission = transmission[:, 0][
+        numpy.where(
+            numpy.logical_or(
+                numpy.real(energies) < bandwidth[0],
+                numpy.real(energies) > bandwidth[1]))]
+    assert in_band_transmission == pytest.approx(value, abs=1e-4)
+    assert out_band_transmission == pytest.approx(0.0, abs=1e-4)
+
 
 def test_transmission_linear_chain():
     """ Test that we can calculate the transmission for an ideal linear chain. """
     negf = pynegf.PyNegf()
     # Build the sparse hamiltonian for the nearest-neighbor linear chain.
-    mat = numpy.zeros(shape=(100,100), dtype='complex128')
-    for ii in range(80):
-        mat[ii, ii - 1] = 1.0
-        mat[ii - 1, ii] = 1.0
-    for ii in range(81, 100):
-        mat[ii, ii - 1] = 1.0
-        mat[ii - 1, ii] = 1.0
-    mat[0, 80] = 1.0
-    mat[80, 0] = 1.0
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=100, contact_size=20, coupling=1.0)
 
-    mat_csr = scipy.sparse.csr_matrix(mat)
-    mat_csr.sort_indices()
     negf.set_hamiltonian(mat_csr)
 
     # Set an identity overlap matrix.
@@ -48,19 +67,54 @@ def test_transmission_linear_chain():
     negf.params.emin = -3.0
     negf.params.emax = 3.0
     negf.params.estep = 0.01
-    negf.params.mu[0] = 0.1
+    negf.params.mu[0] = 0.01
     negf.set_params()
-    negf.print_tnegf()
+    # negf.print_tnegf()
 
     # Set also some local DOS intervals.
     negf.set_ldos_intervals(numpy.array([0, 30, 0]), numpy.array([59, 59, 29]))
     negf.solve_landauer()
 
-    #Get transmission, dos and energies as numpy object
+    # Get transmission, dos and energies as numpy object
     energies = negf.energies()
-    print('energies', energies)
-    trans = negf.transmission()
+    transmission = negf.transmission()
     ldos = negf.ldos()
     currents = negf.currents()
-    print('Currents',currents)
-    print('trans', trans)
+    _check_transmission_values(transmission, energies)
+
+
+def test_transmission_automatic_partition():
+    """ Test that we can calculate the transmission for an ideal linear chain. """
+    negf = pynegf.PyNegf()
+    # Build the sparse hamiltonian for the nearest-neighbor linear chain.
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=100, contact_size=20, coupling=1.0)
+
+    negf.set_hamiltonian(mat_csr)
+
+    # Set an identity overlap matrix.
+    negf.set_identity_overlap(100)
+
+    # Initialize the system structure.
+    negf.init_structure(
+        2,
+        numpy.array([79, 99]),
+        numpy.array([59, 79]),
+        numpy.array([]),
+        numpy.array([3, 0]))
+
+    # Initialize parameters relevant for the transmission.
+    negf.params.emin = -3.0
+    negf.params.emax = 3.0
+    negf.params.estep = 0.01
+    negf.params.mu[0] = 0.01
+    negf.set_params()
+    # negf.print_tnegf()
+
+    # Set also some local DOS intervals.
+    negf.solve_landauer()
+
+    # Get transmission, dos and energies as numpy object
+    energies = negf.energies()
+    transmission = negf.transmission()
+    _check_transmission_values(transmission, energies)
