@@ -2,7 +2,7 @@
 Module with testing utilities.
 """
 import numpy
-import scipy
+from scipy import sparse
 
 
 def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
@@ -22,15 +22,76 @@ def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
     mat = numpy.zeros(shape=(nsites, nsites), dtype='complex128')
 
     for i in range(nsites - contact_size):
-        mat[i, i - 1] = numpy.conj(coupling)
         mat[i - 1, i] = coupling
     for i in range(nsites - contact_size, nsites):
-        mat[i, i - 1] = numpy.conj(coupling)
         mat[i - 1, i] = coupling
-    mat[80, 0] = numpy.conj(coupling)
-    mat[0, 80] = coupling
+    mat[0, nsites - contact_size] = coupling
 
-    mat_csr = scipy.sparse.csr_matrix(mat)
+    mat_csr = ssparse.csr_matrix(mat)
+    mat_csr = mat_csr + mat_csr.conjugate(copy=True).transpose()
+    mat_csr.sort_indices()
+
+    return mat_csr
+
+
+def orthogonal_square_2d_lattice(
+        nblocks=10,
+        block_size=10,
+        n_contact_blocks=1,
+        coupling=1.0):
+    """
+    Build a nearest neighbor hamiltonian for a 2d square lattice with contacts
+    properly arranged. The modeled lattice is:
+
+    ...*--*--*...
+       |  |  |
+    ...*--*--*...
+       |  |  |
+    ...*--*--*...
+
+    The resulting block hamiltonian is:
+
+    0 t   t
+    t 0 t   t
+      t 0     t
+    t     0 t
+      t   t 0 t
+        t   t 0
+    """
+    shape = (block_size, block_size)
+    onsite_block = numpy.zeros(shape=shape, dtype='complex128')
+    hopping_block = numpy.zeros(shape=shape, dtype='complex128')
+    for i in range(block_size - 1):
+        onsite_block[i, i + 1] = coupling
+    for i in range(block_size):
+        hopping_block[i, i] = coupling
+
+    norbitals = nblocks * block_size
+    mat = numpy.zeros(shape=(norbitals, norbitals), dtype='complex128')
+    # Onsite blocks (upper hamiltonian).
+    for i in range(nblocks):
+        mat[
+            i * block_size: (i + 1) * block_size,
+            i * block_size: (i + 1) * block_size] = onsite_block
+
+    # Hopping blocks until second contact.
+    for i in range(nblocks - n_contact_blocks - 1):
+        mat[
+            i * block_size: (i + 1) * block_size,
+            (i + 1) * block_size: (i + 2) * block_size] = hopping_block
+    # Second contact.
+    left_contact_index = (nblocks - n_contact_blocks) * block_size
+    mat[
+        left_contact_index: left_contact_index + block_size,
+        0: block_size] = hopping_block
+
+    for i in range(nblocks - n_contact_blocks + 1, nblocks):
+        mat[
+            (i - 1) * block_size: i * block_size,
+            i * block_size: (i + 1) * block_size] = hopping_block
+
+    mat_csr = sparse.csr_matrix(mat)
+    mat_csr = mat_csr + mat_csr.conjugate(copy=True).transpose()
     mat_csr.sort_indices()
 
     return mat_csr
