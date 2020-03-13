@@ -24,8 +24,7 @@ def _check_transmission_values(
         transmission,
         energies,
         bandwidth=(-2.0, 2.0),
-        value=1.0,
-        energy_tolerance=0.01):
+        value=1.0):
     """
     Check that we have defined transmission within the given bandwidth.
     """
@@ -41,6 +40,46 @@ def _check_transmission_values(
                 numpy.real(energies) > bandwidth[1]))]
     assert in_band_transmission == pytest.approx(value, abs=1e-4)
     assert out_band_transmission == pytest.approx(0.0, abs=1e-4)
+
+
+def _check_ldos_shape(
+        ldos,
+        energies,
+        bandwidth=(-2.0, 2.0),
+        peak_position_tolerance=0.05,
+        energy_tolerance=0.05):
+    """
+    Check that the dos is non-zero in the band and that the highest
+    values is where we expect the Van-Hove singularities.
+    """
+    for ldos_row in ldos:
+        in_band_ldos = ldos_row[
+            numpy.where(
+                numpy.logical_and(
+                    numpy.real(energies) > bandwidth[0] + energy_tolerance,
+                    numpy.real(energies) < bandwidth[1] - energy_tolerance))]
+        out_band_ldos = ldos_row[
+            numpy.where(
+                numpy.logical_or(
+                    numpy.real(energies) < bandwidth[0] - energy_tolerance,
+                    numpy.real(energies) > bandwidth[1] + energy_tolerance))]
+        assert out_band_ldos == pytest.approx(0.0, abs=1e-2)
+        peak_position = numpy.argmax(ldos_row)
+        assert (
+            energies[peak_position] == pytest.approx(
+                bandwidth[0], abs=peak_position_tolerance)
+            or energies[peak_position] == pytest.approx(
+                bandwidth[1], abs=peak_position_tolerance))
+        # The lowest in-band value should be at the middle of the band.
+        minimum_position = numpy.argmin(
+            in_band_ldos)
+        in_band_energies = energies[
+            numpy.where(
+                numpy.logical_and(
+                    numpy.real(energies) > bandwidth[0] + energy_tolerance,
+                    numpy.real(energies) < bandwidth[1] - energy_tolerance))]
+        assert (
+            in_band_energies[minimum_position] == pytest.approx(0.0))
 
 
 def test_transmission_linear_chain():
@@ -85,8 +124,8 @@ def test_transmission_linear_chain():
     # The system is homogeneous, therefore the first LDOS should be equal to
     # the sum of the second and third.
     assert ldos[0, :] == pytest.approx(ldos[1, :] + ldos[2, :])
-    # For sanity check also that the dos is positive and non all zero.
-    assert numpy.sum(ldos) > 1.0
+    # Check ldos shape.
+    _check_ldos_shape(ldos, energies)
 
     # The current in ballistic current units should be equal the
     # spin degeneracy we set, i.e. 1
@@ -137,8 +176,8 @@ def test_transmission_automatic_partition():
     # The system is homogeneous, therefore the first LDOS should be equal to
     # the sum of the second and third.
     assert ldos[0, :] == pytest.approx(ldos[1, :] + ldos[2, :])
-    # For sanity check also that the dos is positive and non all zero.
-    assert numpy.sum(ldos) > 1.0
+    # Check ldos shape.
+    _check_ldos_shape(ldos, energies)
 
     # The current in ballistic current units should be equal the
     # spin degeneracy we set, i.e. 1
