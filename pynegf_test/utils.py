@@ -27,7 +27,7 @@ def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
         mat[i - 1, i] = coupling
     mat[0, nsites - contact_size] = coupling
 
-    mat_csr = ssparse.csr_matrix(mat)
+    mat_csr = sparse.csr_matrix(mat)
     mat_csr = mat_csr + mat_csr.conjugate(copy=True).transpose()
     mat_csr.sort_indices()
 
