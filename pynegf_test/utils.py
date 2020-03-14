@@ -18,6 +18,8 @@ def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
     """
     if contact_size >= nsites / 2:
         raise ValueError("Contacts are too large")
+    if contact_size < 2 and contact_size % 2 != 0:
+        raise ValueError("Contacts must have 2 principal layers or multiples.")
 
     mat = numpy.zeros(shape=(nsites, nsites), dtype='complex128')
 
@@ -58,6 +60,8 @@ def orthogonal_square_2d_lattice(
       t   t 0 t
         t   t 0
     """
+    if n_contact_blocks < 2 and n_contact_blocks % 2 != 0:
+        raise ValueError("Contacts must have 2 principal layers or multiples.")
     shape = (block_size, block_size)
     onsite_block = numpy.zeros(shape=shape, dtype='complex128')
     hopping_block = numpy.zeros(shape=shape, dtype='complex128')
@@ -93,5 +97,9 @@ def orthogonal_square_2d_lattice(
     mat_csr = sparse.csr_matrix(mat)
     mat_csr = mat_csr + mat_csr.conjugate(copy=True).transpose()
     mat_csr.sort_indices()
+
+    import matplotlib.pyplot as plt
+    plt.imshow(numpy.real(mat_csr.todense()))
+    plt.show()
 
     return mat_csr

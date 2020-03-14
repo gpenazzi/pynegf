@@ -137,7 +137,9 @@ def test_transmission_linear_chain():
 
 
 def test_transmission_automatic_partition():
-    """ Test that we can calculate the transmission for an ideal linear chain. """
+    """
+    Test that we can calculate the transmission for an ideal linear chain.
+    """
     negf = pynegf.PyNegf()
     # Build the sparse hamiltonian for the nearest-neighbor linear chain.
     mat_csr = utils.orthogonal_linear_chain(
@@ -186,6 +188,59 @@ def test_transmission_automatic_partition():
 
     # Check that the transmission has the right integer values.
     _check_transmission_values(transmission, energies)
+
+
+def test_transmission_automatic_partition_block():
+    """
+    Test that we can calculate the transmission for quasi-1d block hamiltonian.
+    """
+    negf = pynegf.PyNegf()
+    # Build the sparse hamiltonian for the nearest-neighbor linear chain.
+    mat_csr = utils.orthogonal_square_2d_lattice(
+        nblocks=20, block_size=5, n_contact_blocks=2, coupling=1.0)
+
+    negf.set_hamiltonian(mat_csr)
+
+    # Set an identity overlap matrix.
+    negf.set_identity_overlap(100)
+
+    # Initialize the system structure.
+    negf.init_structure(
+        2,
+        numpy.array([89, 99]),
+        numpy.array([79, 89]))
+
+    # Initialize parameters relevant for the transmission.
+    negf.params.g_spin = 1
+    negf.params.emin = -5.0
+    negf.params.emax = 5.0
+    negf.params.estep = 0.01
+    negf.params.mu[0] = 0.05
+    negf.params.mu[0] = -0.05
+    negf.set_params()
+    # negf.print_tnegf()
+
+    # Set also some local DOS intervals.
+    negf.set_ldos_intervals(numpy.array([0, 30, 0]), numpy.array([59, 59, 29]))
+
+    negf.solve_landauer()
+
+    # Get transmission, dos and energies as numpy object
+    energies = negf.energies()
+    transmission = negf.transmission()
+    ldos = negf.ldos()
+
+    # The system is homogeneous, therefore the first LDOS should be equal to
+    # the sum of the second and third.
+    assert ldos[0, :] == pytest.approx(ldos[1, :] + ldos[2, :])
+
+    # The current in ballistic current units should be equal the
+    # spin degeneracy we set times 5 (number of bands) times delta_mu, i.e. 0.5
+    currents = negf.currents()
+    currents[0] == pytest.approx(0.5)
+
+    # Check that the transmission peaks at 5.0.
+    assert numpy.max(transmission[0, :]) == pytest.approx(5.0)
 
 
 def test_density_linear_chain_eq():
