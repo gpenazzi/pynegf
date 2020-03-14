@@ -98,8 +98,4 @@ def orthogonal_square_2d_lattice(
     mat_csr = mat_csr + mat_csr.conjugate(copy=True).transpose()
     mat_csr.sort_indices()
 
-    import matplotlib.pyplot as plt
-    plt.imshow(numpy.real(mat_csr.todense()))
-    plt.show()
-
     return mat_csr
