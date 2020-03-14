@@ -226,7 +226,6 @@ def test_transmission_automatic_partition_block():
     negf.solve_landauer()
 
     # Get transmission, dos and energies as numpy object
-    energies = negf.energies()
     transmission = negf.transmission()
     ldos = negf.ldos()
 
