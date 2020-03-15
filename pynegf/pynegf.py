@@ -402,7 +402,8 @@ class PyNegf:
 
     def transmission(self):
         """
-        Get a local copy of transmission from libnegf
+        Get a local copy of transmission from libnegf. This quantity
+        is not available if el-ph interactions are used.
 
         Returns:
             trans (ndarray): transmission for all possible
@@ -424,6 +425,33 @@ class PyNegf:
         tr_shape = (tr_shape[0], tr_shape[1])
         trans = (np.ctypeslib.as_array(tr_pointer, shape=tr_shape)).copy()
         return trans.T
+
+    def energy_current(self):
+        """
+        Get a local copy of the energy-resolved current. This quantity is
+        only calculated if el-ph interactions are used.
+
+        Returns:
+            curr (ndarray): energy resolved current for all possible
+                lead pairs (2D array). Currents for each lead pair
+                are ordered by row, i.e. trans[0, :] contains the
+                values for the first lead pair.
+        """
+        self._lib.negf_associate_energy_current.argtypes = [
+            self._href_type,
+            POINTER(c_int * 2),
+            POINTER(POINTER(c_double))
+            ]
+        current_pointer = POINTER(c_double)()
+        current_shape = (c_int * 2)()
+        self._lib.negf_associate_energy_current(
+            self._href,
+            pointer(current_shape),
+            pointer(current_pointer))
+        current_shape = (current_shape[0], current_shape[1])
+        current = (np.ctypeslib.as_array(
+            current_pointer, shape=current_shape)).copy()
+        return current.T
 
     def ldos(self):
         """
@@ -472,6 +500,34 @@ class PyNegf:
             nldos,
             istart_f.astype(dtype=INTTYPE, copy=False),
             iend_f.astype(dtype=INTTYPE, copy=False))
+
+    def set_diagonal_elph_dephasing(self, coupling, max_scba_iter=10):
+        """
+        Define a diagonal electron-phonon dephasing model.
+
+        Args:
+            coupling (double array): the coupling strength on each orbital,
+                expressed as energy.
+            max_scba_iter (int): maximum number of SCBA iterations.
+        """
+        self._lib.negf_set_elph_dephasing.argtypes = [
+            self._href_type,
+            ndpointer(c_double),
+            c_int,
+            ndpointer(c_int),
+            c_int,
+            c_int,
+            c_int]
+        orbsperatom = np.array([])
+
+        self._lib.negf_set_elph_dephasing(
+            self._href,
+            coupling.astype(dtype=REALTYPE, copy=False),
+            coupling.size,
+            orbsperatom.astype(dtype=INTTYPE, copy=False),
+            orbsperatom.size,
+            max_scba_iter,
+            1)
 
     def write_tun_and_dos(self):
         """
