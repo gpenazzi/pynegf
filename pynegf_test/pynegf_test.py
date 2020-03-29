@@ -360,7 +360,7 @@ def test_density_linear_chain_neq_bias():
     # the integration contour.
     negf.params.ec = -2.5
     negf.params.mu[0] = 0.1
-    negf.params.mu[1] = +0.1
+    negf.params.mu[1] = -0.1
     negf.params.kbt_dm = (.001, .001)
     negf.params.g_spin = 2.0
     # Not correctly initialized, setting explicitely.
