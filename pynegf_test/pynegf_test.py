@@ -360,7 +360,7 @@ def test_density_linear_chain_neq_bias():
     # the integration contour.
     negf.params.ec = -2.5
     negf.params.mu[0] = 0.1
-    negf.params.mu[1] = -0.1
+    negf.params.mu[1] = +0.1
     negf.params.kbt_dm = (.001, .001)
     negf.params.g_spin = 2.0
     # Not correctly initialized, setting explicitely.
@@ -376,10 +376,10 @@ def test_density_linear_chain_neq_bias():
 
     # The system is ballistic, therefore we should have identical
     # occupation all over the chain.
-    assert diagonal[:60] == pytest.approx(diagonal[0])
+    assert diagonal[:60] == pytest.approx(diagonal[0], abs=1e-4)
 
     # The occupation should 1.
-    assert diagonal[0] == pytest.approx(0.0, abs=1e-3)
+    assert diagonal[0] == pytest.approx(1.0, abs=1e-4)
 
     # We should have 2 particles (due to degeneracy) per site.
     diagonal = density_matrix.diagonal()

@@ -151,7 +151,6 @@ def test_density_matrix_dephasing_linear_chain():
     # In presens of dephasing the occupation should be a ramp,
     # decreasing from the left to the right contact.
     for dm in dephasing_density_matrix[1:]:
-        print(numpy.diagonal(dm))
         for i in range(1, 29):
             assert numpy.diagonal(dm)[i - 1] > numpy.diagonal(dm)[i]
 
