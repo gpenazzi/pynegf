@@ -54,8 +54,4 @@ Most of input parameters are contained in a data structure, first populated
 with default values. The actual calculation is then triggerred with `solve`
 methods and afterwards results can be retrieved via specialized functions.
 
-The following example shows a calculation of transmission and DOS
-for a simple linear chain.
-
-.. literalinclude:: example1.py
-   :language: python
+Refer to the :ref:`Tutorials` section for usage examples.

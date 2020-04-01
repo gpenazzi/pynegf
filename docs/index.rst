@@ -30,13 +30,14 @@ Pynegf allows to use most of libnegf features. Currently this include:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Content:
 
    contents/gettingstarted.rst
 
-   modules.rst
+   Reference guide <modules.rst>
 
-   notebooks/linearchain.ipynb
+   Tutorials <notebooks.rst>
+
 
 
 Indices and tables
