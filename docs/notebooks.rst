@@ -10,3 +10,5 @@ All the tutorials are available as Jupyter notebooks in
 
    notebooks/linearchain.ipynb
    notebooks/linearchain_dephasing.ipynb
+   notebooks/linearchain_density.ipynb
+   notebooks/linearchain_neq_density.ipynb
