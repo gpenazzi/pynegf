@@ -317,8 +317,6 @@ def test_density_linear_chain_eq_2d():
     negf.params.mu[1] = 0.0
     negf.params.kbt_dm = (.001, .001)
     negf.params.g_spin = 2.0
-    # Not correctly initialized, setting explicitely.
-    negf.params.np_real = tuple([0] * 11)
     negf.params.verbose = 0
 
     negf.set_params()
@@ -363,8 +361,7 @@ def test_density_linear_chain_neq_bias():
     negf.params.mu[1] = -0.1
     negf.params.kbt_dm = (.001, .001)
     negf.params.g_spin = 2.0
-    # Not correctly initialized, setting explicitely.
-    negf.params.np_real = tuple([50] * 11)
+    negf.params.np_real[0] = 50
     negf.params.verbose = 0
 
     negf.set_params()

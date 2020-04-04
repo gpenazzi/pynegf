@@ -114,7 +114,7 @@ def _density_linear_chain_dephasing(coupling=None):
     negf.params.mu[1] = 0.1
     negf.params.kbt_dm[0] = 0.001
     negf.params.kbt_dm[1] = 0.001
-    negf.params.np_real = tuple([50] * 11)
+    negf.params.np_real[0] = 50
     negf.verbosity = 100
     negf.set_params()
     if coupling is not None:

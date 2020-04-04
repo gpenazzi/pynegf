@@ -109,6 +109,9 @@ class PyNegf:
         # Init parameters to default
         self.params = PyNegf.LNParams()
         self.get_params()
+        # Note: this fixes an issue in libnegf: np_real is not
+        # correctly initialized.
+        self.params.np_real = tuple([0] * 11)
 
     def __del__(self):
         """Clean up the library when the wrapper is collected."""
