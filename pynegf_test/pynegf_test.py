@@ -438,3 +438,143 @@ def test_density_linear_chain_neq_2d():
 
     # The contact density matrix is ignored, therefore it should be zero.
     assert diagonal[80:] == pytest.approx(0.0)
+
+
+def test_run_twice_transmission():
+    """ Check that we can run a transmission twice after changing parameters """
+    negf = pynegf.PyNegf()
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=10, contact_size=2, coupling=1.0)
+
+    negf.set_hamiltonian(mat_csr)
+    negf.set_identity_overlap(10)
+
+    # Initialize structure and parameters.
+    negf.init_structure(
+        2,
+        numpy.array([7, 9]),
+        numpy.array([5, 7]))
+    negf.params.emin = -1.0
+    negf.params.emax = 1.0
+    negf.params.estep = 0.5
+    negf.params.g_spin = 1
+    negf.set_params()
+
+    # Run.
+    negf.solve_landauer()
+    energies = negf.energies()
+    transmission = negf.transmission()
+    assert numpy.min(energies) == pytest.approx(-1.0)
+    assert numpy.max(energies) == pytest.approx(1.0)
+    assert transmission[0] == pytest.approx(1.0)
+
+    # Change some parameter and run again.
+    negf.params.emin = -1.5
+    negf.set_params()
+    negf.solve_landauer()
+    energies = negf.energies()
+    print('EN', energies)
+    transmission = negf.transmission()
+    assert numpy.min(energies) == pytest.approx(-1.5)
+    assert numpy.max(energies) == pytest.approx(1.0)
+    assert transmission[0] == pytest.approx(1.0)
+
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=14, contact_size=2, coupling=1.0)
+    negf.set_hamiltonian(mat_csr)
+    negf.set_identity_overlap(14)
+
+    # Initialize structure and parameters.
+    negf.init_structure(
+        2,
+        numpy.array([11, 13]),
+        numpy.array([9, 11]))
+    negf.params.emin = -1.0
+    negf.params.emax = 1.0
+    negf.params.estep = 0.5
+    negf.params.g_spin = 1
+    negf.set_params()
+    negf.solve_landauer()
+    energies = negf.energies()
+    transmission = negf.transmission()
+    assert numpy.min(energies) == pytest.approx(-1.0)
+    assert numpy.max(energies) == pytest.approx(1.0)
+    assert transmission[0] == pytest.approx(1.0)
+
+@pytest.mark.skip("Issue upstream: trying to reallocate an allocated vector")
+def test_run_twice_density1():
+    """ Check that we can run a density twice after changing parameters """
+    negf = pynegf.PyNegf()
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=10, contact_size=2, coupling=1.0)
+
+    negf.set_hamiltonian(mat_csr)
+    negf.set_identity_overlap(10)
+
+    # Initialize structure and parameters.
+    negf.init_structure(
+        2,
+        numpy.array([7, 9]),
+        numpy.array([5, 7]))
+    negf.params.ec = -2.5
+    negf.params.mu[0] = 0.0
+    negf.params.mu[1] = 0.0
+    negf.params.kbt_dm = (.001, .001)
+    negf.params.g_spin = 2.0
+    negf.params.verbose = 0
+
+    # Calculate the density matrix.
+    negf.solve_density()
+    density_matrix = negf.density_matrix()
+    diagonal = density_matrix.diagonal()
+    assert diagonal[:6] == pytest.approx(1.0)
+
+    # Change something in the parameters.
+    negf.params.ec = -2.5
+    negf.params.mu[0] = 0.1
+    negf.params.mu[1] = -0.1
+    negf.params.kbt_dm = (.1, .1)
+    negf.params.g_spin = 2.0
+    negf.params.np_real[0] = 10
+    negf.solve_density()
+    density_matrix = negf.density_matrix()
+    diagonal = density_matrix.diagonal()
+    assert diagonal[:6] == pytest.approx(1.0)
+
+@pytest.mark.skip("Issue upstream: trying to reallocate an allocated vector")
+def test_run_twice_density2():
+    """ Check that we can run a density twice after changing parameters """
+    negf = pynegf.PyNegf()
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=10, contact_size=2, coupling=1.0)
+
+    negf.set_hamiltonian(mat_csr)
+    negf.set_identity_overlap(10)
+
+    # Initialize structure and parameters.
+    negf.init_structure(
+        2,
+        numpy.array([7, 9]),
+        numpy.array([5, 7]))
+    negf.params.ec = -2.5
+    negf.params.mu[0] = 0.0
+    negf.params.mu[1] = 0.0
+    negf.params.kbt_dm = (.001, .001)
+    negf.params.g_spin = 2.0
+    negf.params.verbose = 0
+
+    # Calculate the density matrix.
+    negf.solve_density()
+    density_matrix = negf.density_matrix()
+    diagonal = density_matrix.diagonal()
+    assert diagonal[:6] == pytest.approx(1.0)
+
+    # Change hamiltonian.
+    mat_csr = utils.orthogonal_linear_chain(
+        nsites=14, contact_size=2, coupling=1.0)
+    negf.set_hamiltonian(mat_csr)
+    negf.set_identity_overlap(14)
+    negf.solve_density()
+    density_matrix = negf.density_matrix()
+    diagonal = density_matrix.diagonal()
+    assert diagonal[:6] == pytest.approx(1.0)
