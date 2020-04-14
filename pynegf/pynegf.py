@@ -87,8 +87,9 @@ class PyNegf:
                 'Running serially.')
         elif mpicomm is None and mpi.has_mpi():
             mpicomm = mpi.get_world_comm()
-            logging.info('Running libnegf on {} processes'.format(
-                mpicomm.Get_size()))
+            # TODO: re-enable logging when we can set log detail from outside.
+            # logging.info('Running libnegf on {} processes'.format(
+            #     mpicomm.Get_size()))
 
         # Initialize and store handler reference in self._href
         self._handler_size = c_int()
