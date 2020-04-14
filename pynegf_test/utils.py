@@ -5,7 +5,11 @@ import numpy
 from scipy import sparse
 
 
-def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
+def orthogonal_linear_chain(
+        nsites=100,
+        contact_size=20,
+        coupling=1.0,
+        onsite=0.0):
     """
     Build the hamiltonian of an orthogonal nearest neighbor
     linear chain with the correct arrangement for the contacts.
@@ -15,6 +19,7 @@ def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
     Args:
         nsites (int): the number of sites.
         coupling (complex): the hopping matrix element.
+        onsite (float): the hopping matrix element.
     """
     if contact_size >= nsites / 2:
         raise ValueError("Contacts are too large")
@@ -28,9 +33,10 @@ def orthogonal_linear_chain(nsites=100, contact_size=20, coupling=1.0):
     for i in range(nsites - contact_size, nsites):
         mat[i - 1, i] = coupling
     mat[0, nsites - contact_size] = coupling
+    numpy.fill_diagonal(mat, onsite / 2.0)
 
     mat_csr = sparse.csr_matrix(mat)
-    mat_csr = mat_csr + mat_csr.conjugate(copy=True).transpose()
+    mat_csr = mat_csr + mat_csr.getH()
     mat_csr.sort_indices()
 
     return mat_csr
