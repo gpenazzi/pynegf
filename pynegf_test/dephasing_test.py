@@ -272,7 +272,7 @@ def test_current_conservation_dephasing(coupling=None):
 
             negf.solve_landauer()
             tmp_currents = negf.currents()
-            assert tmp_currents[0] == - tmp_currents[1]
+            assert tmp_currents[0] == pytest.approx( -tmp_currents[1], 1e-9)
             currents.append(tmp_currents[0])
-        print(currents)
-        assert currents[0] == - currents[1]
+
+        assert currents[0] == pytest.approx(-currents[1], 1e-9)
