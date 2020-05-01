@@ -220,3 +220,59 @@ def test_density_matrix_dephasing_linear_chain_overlap():
     # TODO: values to be determined
     # assert dm1[0] - dm1[29] == pytest.approx(0.00115, rel=0.01)
     # assert dm2[0] - dm2[29] == pytest.approx(0.0399, rel=0.01)
+
+
+def test_current_conservation_dephasing(coupling=None):
+    """ Test that we have current conservation at the electrodes """
+    currents = []
+    for orthogonal in [True, False]:
+        for (ni, nf) in [(1, 2), (2, 1)]:
+            negf = pynegf.PyNegf()
+            # Build the sparse hamiltonian for the nearest-neighbor linear chain.
+            mat_csr = utils.orthogonal_linear_chain(
+                nsites=50, contact_size=10, coupling=1.0)
+            if orthogonal:
+                negf.set_hamiltonian(mat_csr)
+                # Set an identity overlap matrix.
+                negf.set_identity_overlap(50)
+            else:
+                negf.set_hamiltonian(mat_csr)
+                mat_csr = utils.orthogonal_linear_chain(
+                    nsites=50, contact_size=10, coupling=0.1, onsite=1.0)
+                # This is to make sure that S is positive definite.
+                numpy.linalg.cholesky(mat_csr.todense())
+                # Set an identity overlap matrix.
+                negf.set_overlap(mat_csr)
+
+            # Initialize the system structure.
+            negf.init_structure(
+                2,
+                numpy.array([39, 49]),
+                numpy.array([29, 39]))
+
+            # Initialize parameters relevant for the transmission.
+            negf.params.ec = -5.0
+            negf.params.emin = -0.2
+            negf.params.emax = 0.2
+            negf.params.estep = 0.005
+            negf.params.mu[0] = 0.1
+            negf.params.mu[1] = -0.1
+            # IMPORTANT: ni and nf must be both defined.
+            negf.params.ni[0] = ni
+            negf.params.ni[1] = nf
+            negf.params.nf[0] = nf
+            negf.params.nf[1] = ni
+            negf.params.kbt_t[1] = 0.01
+            negf.params.kbt_t[0] = 0.01
+            negf.params.np_real[0] = 50
+            negf.verbosity = 0
+            negf.set_params()
+            coupling = 0.1
+            negf.set_diagonal_elph_dephasing(numpy.array([coupling]*30))
+
+            negf.solve_landauer()
+            tmp_currents = negf.currents()
+            assert tmp_currents[0] == - tmp_currents[1]
+            currents.append(tmp_currents[0])
+        print(currents)
+        assert currents[0] == - currents[1]
