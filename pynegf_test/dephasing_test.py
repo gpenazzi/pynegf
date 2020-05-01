@@ -177,7 +177,7 @@ def test_density_matrix_dephasing_linear_chain():
     assert dm2[0] - dm2[29] == pytest.approx(0.0399, rel=0.01)
 
 
-@pytest.mark.skip(reason="Backengine implementation still buggy")
+@pytest.mark.skip(reason="Not clear if the backengine is correct physically")
 def test_density_matrix_dephasing_linear_chain_overlap():
     """
     Test that we can calculate the density matrix with dephasing for an
