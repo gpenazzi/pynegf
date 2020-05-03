@@ -34,6 +34,7 @@ class Settings(dict):
 
         # Add blas and lapack from numpy. The first found is used.
         numpy_config = numpy.__config__
+        print('DEBUG ', numpy.show_config())
         blas_info = [
             x for x in dir(numpy_config) if 'blas' in x and '_info' in x][0]
         if blas_info:
