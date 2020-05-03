@@ -41,6 +41,10 @@ class Settings(dict):
             dependencies['blas'] = {
                 'paths': [
                     util.find_library(x) for x in blas_info['libraries']]}
+        # Fallback to sistem blas is any.
+        else:
+            dependencies['blas'] = {
+                'paths': [util.find_library('blas')]}
 
         lapack_info = [
             x for x in dir(numpy_config) if 'lapack' in x and '_info' in x][0]
@@ -49,6 +53,10 @@ class Settings(dict):
             dependencies['lapack'] = {
                 'paths': [
                     util.find_library(x) for x in lapack_info['libraries']]}
+        # Fallback to sistem lapack is any.
+        else:
+            dependencies['lapack'] = {
+                'paths': [util.find_library('lapack')]}
 
         return dependencies
 
