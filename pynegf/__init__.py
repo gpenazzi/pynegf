@@ -149,7 +149,7 @@ def load_runtime_environment() -> RuntimeEnvironment:
     global runtime_environment
     runtime_environment = RuntimeEnvironment(
         dependencies=_load_dependencies(),
-        logger=logging.getLogger('pynegfLogger'))
+        logger=logging.getLogger('pynegf'))
     runtime_environment.logger.setLevel(settings['loglevel'])
 
     return runtime_environment
@@ -164,3 +164,8 @@ def cdll_libnegf() -> ctypes.CDLL:
         The loaded CDLL object
     """
     return runtime_environment.dependencies['negf']
+
+
+def log() -> logging.Logger:
+    """ Returns the global logger """
+    return runtime_environment.logger
