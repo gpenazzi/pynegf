@@ -8,7 +8,7 @@ import typing
 
 # Package imports.
 from .pynegf import PyNegf
-
+from .version import __version__
 
 class Settings(dict):
     """

@@ -1,11 +1,17 @@
+from distutils.util import convert_path
 from skbuild import setup
+
+main_ns = {}
+ver_path = convert_path('pynegf/version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), main_ns)
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name="pynegf",
-    version="0.0.1",
+    version=main_ns['__version__'],
     author="Gabriele Penazzi",
     author_email="g.penazzi@gmail.com",
     description="A wrapper for libnegf, a library for Non Equilibrium Green's Function based charge transport.",
