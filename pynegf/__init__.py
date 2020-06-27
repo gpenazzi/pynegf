@@ -22,67 +22,17 @@ class Settings(dict):
         self.update(self.defaults())
 
     @staticmethod
-    def _library_path(names, directories):
-        """
-        Utility to return a path ctypes.util.find_library can find.
-        """
-        paths = []
-        for name in names:
-            path = None
-            if util.find_library(name):
-                return [util.find_library(name)]
-            else:
-                for directory in directories:
-                    path = util.find_library(
-                        os.path.join(directory, 'lib' + name + '.so'))
-                    if path:
-                        paths.append(path)
-
-        return paths
-
-
-    @staticmethod
     def _set_dependencies():
         """
         Set defaults for the list of dependencies linked at runtime.
         This includes libnegf, blas and lapack.
         """
+        os.environ['LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH']
         # Add libnegf.
         path = util.find_library('negf')
         dependencies = {}
         dependencies['negf'] = {
             'paths': [path]}
-
-        # Add blas and lapack from numpy. The first good one is used.
-        numpy_config = numpy.__config__
-        blas_info = [
-            getattr(numpy_config, x)
-            for x in dir(numpy_config) if 'blas' in x and '_info' in x]
-        paths = None
-        for info in [x for x in blas_info if x]:
-            paths = Settings._library_path(
-                info['libraries'], info['library_dirs'])
-            if paths:
-                dependencies['blas'] = {'paths': paths}
-
-        lapack_info = [
-            getattr(numpy_config, x)
-            for x in dir(numpy_config) if 'lapack' in x and '_info' in x]
-        paths = None
-        for info in [x for x in lapack_info if x]:
-            paths = Settings._library_path(
-                info['libraries'], info['library_dirs'])
-            if paths:
-                dependencies['lapack'] = {'paths': paths}
-
-        if 'blas' not in dependencies.keys():
-            paths = Settings._library_path(['blas'], ['', 'usr/local/lib'])
-            if paths:
-                dependencies['blas'] = {'paths': paths}
-        if 'lapack' not in dependencies.keys():
-            paths = Settings._library_path(['lapack'], ['', 'usr/local/lib'])
-            if paths:
-                dependencies['lapack'] = {'paths': paths}
 
         return dependencies
 
@@ -92,8 +42,6 @@ class Settings(dict):
         Returns a dictionary of default settings. The available settings are:
 
         `negf_path`: path of libnegf
-        `blas_path`: path of libblas
-        `lapack_path`: path of liblapack
         """
         defaults = {
             'dependencies': Settings._set_dependencies()}
