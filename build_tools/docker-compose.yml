@@ -1,4 +1,7 @@
 version: '2.2'
 services:
   wheel:
+    container_name: test
     build: .
+    volumes:
+      - ./scratch:/scratch

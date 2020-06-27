@@ -2,7 +2,7 @@
 set -e -x
 
 # CLI arguments
-PY_VERSIONS="cp36-cp36m cp37-cp37m"
+PY_VERSIONS="cp38-cp38" #"cp37-cp37m" "cp36-cp36m"
 BUILD_REQUIREMENTS=gfortran
 SYSTEM_PACKAGES=
 BUILD_REQUIREMENTS="scikit-build"
@@ -30,14 +30,16 @@ for PY_VER in "${arrPY_VERSIONS[@]}"; do
 
     # Build wheels
     cmake --version
-    /opt/python/"${PY_VER}"/bin/python setup.py install -- -G "Unix Makefiles" || { echo "Building wheels failed."; exit 1; }
+    #/opt/python/"${PY_VER}"/bin/python setup.py install -- -G "Unix Makefiles" || { echo "Building wheels failed."; exit 1; }
     /opt/python/"${PY_VER}"/bin/python setup.py bdist_wheel -- -G "Unix Makefiles" || { echo "Building wheels failed."; exit 1; }
 done
 
 # Bundle external shared libraries into the wheels
-for whl in /github/workspace/wheelhouse/*-linux*.whl; do
+for whl in /pynegf/dist/*-linux*.whl; do
     auditwheel repair "$whl" --plat "${PLAT}" -w dist || { echo "Repairing wheels failed."; auditwheel show "$whl"; exit 1; }
 done
 
 echo "Succesfully build wheels:"
 ls dist
+# Copying to local volume scratch
+cp dist/*manylinux* /scratch/
