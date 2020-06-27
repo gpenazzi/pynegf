@@ -40,6 +40,8 @@ class PyNegf:
             ("g_spin", c_double),
             ("delta", c_double),
             ("dos_delta", c_double),
+            ("delta_model", c_int),
+            ("wmax", c_double),
             ("eneconv", c_double),
             ("wght", c_double),
             ("ec", c_double),
