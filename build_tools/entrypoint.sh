@@ -15,7 +15,9 @@ fi
 
 # Checkout package
 git clone https://github.com/gpenazzi/pynegf.git && cd pynegf
+git checkout dockers
 git submodule update --init --recursive
+cd libnegf && git apply ../build_tools/patches/libnegf1.patch && cd ..
 
 # Compile wheels
 arrPY_VERSIONS=(${PY_VERSIONS// / })

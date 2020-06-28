@@ -1,0 +1,15 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 010a556..5eb028d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -73,9 +73,7 @@ if(WITH_MPI)
+   find_package(MPI REQUIRED)
+   add_dependencies(negf mpifx)
+   target_include_directories(negf PRIVATE ${MPIFX_INCLUDE_DIR})
+-  target_link_libraries(negf PRIVATE mpifx ${MPI_Fortran_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+-else()
+-  target_link_libraries(negf PRIVATE ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
++  target_link_libraries(negf PRIVATE mpifx )
+ endif()
+ 
+ target_include_directories(negf PUBLIC
