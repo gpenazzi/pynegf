@@ -2,7 +2,7 @@
 set -e -x
 
 # CLI arguments
-PY_VERSIONS="cp38-cp38" #"cp37-cp37m" "cp36-cp36m"
+PY_VERSIONS="cp38-cp38 cp37-cp37m" #"cp36-cp36m"
 BUILD_REQUIREMENTS=gfortran
 SYSTEM_PACKAGES=
 BUILD_REQUIREMENTS="scikit-build"
@@ -17,7 +17,7 @@ fi
 git clone https://github.com/gpenazzi/pynegf.git && cd pynegf
 git checkout dockers
 git submodule update --init --recursive
-cd libnegf && git apply ../build_tools/patches/libnegf1.patch && cd ..
+# cd libnegf && git apply ../build_tools/patches/libnegf1.patch && cd ..
 
 # Compile wheels
 arrPY_VERSIONS=(${PY_VERSIONS// / })
@@ -38,10 +38,10 @@ done
 
 # Bundle external shared libraries into the wheels
 for whl in /pynegf/dist/*-linux*.whl; do
-    auditwheel repair "$whl" --plat "${PLAT}" -w dist || { echo "Repairing wheels failed."; auditwheel show "$whl"; exit 1; }
+    auditwheel -v repair "$whl" --plat "${PLAT}" || { echo "Repairing wheels failed."; auditwheel show "$whl"; exit 1; }
 done
 
 echo "Succesfully build wheels:"
 ls dist
 # Copying to local volume scratch
-cp dist/*manylinux* /scratch/
+cp wheelhouse/*manylinux* /scratch/
