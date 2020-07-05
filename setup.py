@@ -29,5 +29,6 @@ setup(
     tests_require=['pytest'],
     cmake_args=[
         '-DBUILD_SHARED_LIBS=ON'],
-    cmake_source_dir='libnegf'
+    cmake_source_dir='libnegf',
+    cmake_install_dir='pynegf'
 )
