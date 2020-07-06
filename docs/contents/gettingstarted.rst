@@ -34,11 +34,10 @@ compile libnegf with MPI support you can use:
 For more information on how to pass additional arguments refer to the
 `scikit-build <https://github.com/scikit-build/scikit-build>`_ documentation.
 
-Pynegf requires also an installed version of blas and lapack, which are
-loaded at runtime.
+If a compatible version of `libnegf` is installed in the system, the
+compilation of the library can be skipped. `pynegf` will try by default to
+load the local libnegf, and will use a system one as a fallback.
 
-It is also possible to install libnegf and skip the libnegf build step
-in installation.
 You can force a given libnegf path doing the following:
 
 ::
@@ -47,6 +46,8 @@ You can force a given libnegf path doing the following:
     $ pynegf.settings['negf']=r'/home/user/whateverpath/libnegf.so'
     $ pynegf.dependencies = load_dependencies()
 
+The folder `build_tools` contains the docker instructions to generate a
+manylinux wheel if desired.
 
 The python wrapper works similarly to the Fortran library: the Hamiltonian and
 Overlap are passed as input parameters using setters.
