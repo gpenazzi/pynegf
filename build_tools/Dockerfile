@@ -7,7 +7,7 @@ RUN /opt/python/cp37-cp37m/bin/pip install -i https://pypi.tuna.tsinghua.edu.cn/
 RUN ln -fs /opt/python/cp37-cp37m/bin/cmake /usr/bin/cmake
 
 # System python3 must be present to execute the scripts building API wrappers.
-RUN yum install -y python3 lapack-devel.x86_64 lapack.x86_64
+RUN yum install -y python3 openblas-devel.x86_64 openblas.x86_64
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
