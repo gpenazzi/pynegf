@@ -27,9 +27,13 @@ class Settings(dict):
         Set defaults for the list of dependencies linked at runtime.
         This includes libnegf, blas and lapack.
         """
-        os.environ['LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH']
-        # Add libnegf.
-        path = util.find_library('negf')
+        # Add libnegf. The default install location is in the .lib folder.
+        # If it fails, look for a system libnegf.
+        path = os.path.dirname(__file__)
+        path = util.find_library(os.path.join(path, 'lib/libnegf.so'))
+        if path is None:
+            os.environ['LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH']
+            path = util.find_library('negf')
         dependencies = {}
         dependencies['negf'] = {
             'paths': [path]}
