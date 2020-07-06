@@ -30,10 +30,8 @@ class Settings(dict):
         # Add libnegf. The default install location is in the .lib folder.
         # If it fails, look for a system libnegf.
         path = os.path.dirname(__file__)
-        print('DEBUG PRINT ', path, os.listdir(path))
-        print('DEBUG PRINT ', os.listdir(os.path.join(path, 'lib')))
-        path = util.find_library(os.path.join(path, 'lib/libnegf.so'))
-        if path is None:
+        path = os.path.join(path, 'lib/libnegf.so')
+        if not os.path.exists(path):
             try:
                 os.environ['LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH']
                 path = util.find_library('negf')
