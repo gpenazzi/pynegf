@@ -228,6 +228,7 @@ class PyNegf:
             c_int,
             ndpointer(c_int),
             ndpointer(c_int),
+            ndpointer(c_int),
             c_int,
             ndpointer(c_int),
             ndpointer(c_int)
@@ -238,12 +239,15 @@ class PyNegf:
         surfend_f = surfend + 1
         plend_f = plend + 1
         cblk_f = cblk + 1
+        # surfstart not supported for now.
+        surfstart_f = surfend_f + 1
 
         self._lib.negf_init_structure(
             self._href,
             c_int(ncont),
-            contend_f.astype(dtype=INTTYPE, copy=False),
+            surfstart_f.astype(dtype=INTTYPE, copy=False),
             surfend_f.astype(dtype=INTTYPE, copy=False),
+            contend_f.astype(dtype=INTTYPE, copy=False),
             c_int(npl),
             plend_f.astype(dtype=INTTYPE, copy=False),
             cblk_f.astype(dtype=INTTYPE, copy=False))
